@@ -1,0 +1,169 @@
+<div class="container">
+  <!-- block for add change in text -->
+  <div class="bottom-block" *ngIf="isEdit">
+    <div class="area">
+      <div class="tag-block">
+        <input *ngFor="let tag of tagBtn" type="button" value="{{tag}}" class="btn btn-tag" (click)="Tag(tag)">
+      </div>
+      <textarea class="edit-area" [(ngModel)]="editArea"></textarea>
+    </div>
+    <input type="button" value="Зберегти" class="btn" (click)="Save()">
+    <input type="button" value="Додати" class="btn" (click)="Add()">
+  </div>
+
+  <!-- add table -->
+  <div class="addElem" *ngIf="addElem">
+    <h3>Що додамо?</h3>
+    <fieldset class="border">
+      <legend>
+        <input (click)="addItem(table)" type="button" name="item" value="Таблиця" class="table"
+          [ngClass]="{ activeTable: isTable, noActiveTable:!isTable }">
+        <input (click)="addItem(list)" type="button" name="item" value="Список" class="list"
+          [ngClass]="{ activeList: isList, noActiveList:!isList }">
+      </legend>
+      <div class="create-table" *ngIf="isTable">
+        <form name="form-table" #form="ngForm">
+          <fieldset class="form">
+            <legend>Ширина і висота комірки таблиці</legend>
+            <div class="hint widthCell"
+              *ngIf="(widthCell.dirty && widthCell.invalid) || (widthCell.touched && widthCell.invalid)">Введіть число в
+              діапазоні 1..99</div>
+            <span>Ширина</span>
+            <input type="number" name="widthCell" [(ngModel)]="tableForm.widthCell" #widthCell="ngModel" required
+              min="1" max="99">
+            <div class="hint heightCell"
+              *ngIf="(heightCell.dirty && heightCell.invalid) || (heightCell.touched && heightCell.invalid)">Введіть
+              число в діапазоні 1..99</div>
+            <span>Висота</span>
+            <input type="number" name="heightCell" [(ngModel)]="tableForm.heightCell" required #heightCell="ngModel"
+              min="1" max="99">
+          </fieldset>
+          <fieldset class="form">
+            <legend>Товщина, колір, тип лінії таблиці</legend>
+            <div class="inOneRow">
+              <div class="hint borderWidth"
+                *ngIf="(borderWidth.dirty && borderWidth.invalid) || (borderWidth.touched && borderWidth.invalid)">
+                Введіть число в діапазоні 1..99</div>
+              <span>Товщина</span>
+              <input type="number" name="borderWidth" [(ngModel)]="tableForm.borderWidth" required
+                #borderWidth="ngModel" min="1" max="99">
+              <span>Тип лінії</span>
+              <select name="type" class="form-control w-10" name="borderType" [(ngModel)]="selectedBorderType"
+                (change)="onChangeBorderType($event)">
+                <option *ngFor="let type of tableForm.borderTypes" [value]="type">{{type}}</option>
+              </select>
+              <span>Колір</span>
+              <span class="color-box">
+                <input type="color" [(ngModel)]="tableForm.borderColors" name="color"
+                  (change)="onChangeBorderColor()"></span>
+            </div>
+          </fieldset>
+          <fieldset class="form">
+            <legend>Кількість рядків і стовпців</legend>
+            <div class="hint countCell"
+              *ngIf="(countCell.dirty && countCell.invalid) || (countCell.touched && countCell.invalid)">Введіть число в
+              діапазоні 1..99</div>
+            <span>Кількість стовпців</span>
+            <input type="number" name="countCell" [(ngModel)]="tableForm.countCell" #countCell="ngModel" required
+              min="1" max="99">
+            <div class="hint countRow"
+              *ngIf="(countRow.dirty && countRow.invalid) || (countRow.touched && countRow.invalid)">Введіть число в
+              діапазоні 1..99</div>
+            <span>Кількість рядків</span>
+            <input type="number" name="countRow" [(ngModel)]="tableForm.countRow" #countRow="ngModel" required min="1"
+              max="99">
+          </fieldset>
+          <div class="btn-space">
+            <input type="button" value="Додати" name="create" class="btn addBtn" (click)="createTable()"
+              *ngIf="widthCell.valid && countCell.valid && borderWidth.valid && heightCell.valid && countRow.valid">
+          </div>
+        </form>
+      </div>
+      <!-- add list -->
+      <div class="form-list" *ngIf="isList">
+        <form name="form-list" #form="ngForm">
+          <fieldset class="form">
+            <legend>Тип списку</legend>
+            <input (click)="addTypeList(ol)" type="radio" name="type" value="ol" id="ol">
+            <label for="ol">Нумерований</label>
+            <input (click)="addTypeList(ul)" type="radio" name="type" value="ul" id="ul">
+            <label for="ul">Маркований</label>
+          </fieldset>
+          <div class="btn-space" *ngIf="!addList"></div>
+          <div *ngIf="addList">
+            <fieldset class="form">
+              <legend>Параметри списку</legend>
+              <div class="hint countLi"
+                *ngIf="(countLi.dirty && countLi.invalid) || (countLi.touched && countLi.invalid)">Введіть число в
+                діапазоні 1..99</div>
+              <span>Кількість елементів</span>
+              <input type="number" name="countLi" [(ngModel)]="listForm.countLi" #countLi="ngModel" required min="1"
+                max="99">
+              <span>Тип маркування</span>
+              <select name="type" name="selectedType" [(ngModel)]="selectedTypeOl" (change)="onChangeType($event)"
+                *ngIf="isOl">
+                <option *ngFor="let type of listForm.typeLiOl" [value]="type">{{type}}</option>
+              </select>
+              <select name="type" name="selectedType" [(ngModel)]="selectedTypeUl" (change)="onChangeType($event)"
+                *ngIf="isUl">
+                <option *ngFor="let type of listForm.typeLiUl" [value]="type">{{type}}</option>
+              </select>
+            </fieldset>
+            <div class="btn-space">
+              <input type="button" value="Додати" name="createLi" class="btn addBtn" (click)="createList()"
+                *ngIf="countLi.valid">
+            </div>
+          </div>
+        </form>
+      </div>
+    </fieldset>
+
+
+    <div class="example">
+      <input type="button" value="Подивитись на приклад" name="create" class="btn btnExample" (click)="Example()">
+      <div class="example-block" *ngIf="closeExample">
+        <div class="top">
+          <input type="button" class="close" (click)="CloseExample()">
+        </div>
+        <div class="main" [innerHtml]="example | safeHtml">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!--block for add style -->
+  <div class="style-block" *ngIf="isStyle">
+    <form #form="ngForm">
+      <fieldset class="form-size">
+        <legend>Розмір шрифту</legend>
+        <div *ngFor="let size of styleForm.fontSize">
+          <input (click)="SizeStyle(size)" type="radio" name="size" value="{{size}}pt" class="form-check-input">
+          <label for="{{size}}" class="form-check-label">{{size}}pt</label>
+        </div>
+      </fieldset>
+      <fieldset class="form-family">
+        <legend>Шрифт</legend>
+        <select class="fontFamily" name="selectedQuantity" [(ngModel)]="selectedQuantity"
+          (change)="FamilyStyle($event)">
+          <option *ngFor="let ffamily of styleForm.fontFamily" [value]="ffamily">{{ffamily}}</option>
+        </select>
+      </fieldset>
+      <fieldset class="form-color" ng-app>
+        <legend>Колір</legend>
+        <span>Background</span>
+        <span class="bgcolor-box">
+          <input type="color" [(ngModel)]="styleForm.bgcolor" name="bgcolor" (change)="BgColorStyle()"></span>
+        <span>Text</span>
+        <span class="color-box">
+          <input type="color" [(ngModel)]="styleForm.color" name="color" (change)="ColorStyle()"></span>
+      </fieldset>
+      <fieldset class="form-style">
+        <legend>Стиль тексту</legend>
+        <div *ngFor="let style of styleForm.textDecor">
+          <label for="{{style}}">{{style}}</label>
+          <input type="checkbox" id="{{style}}" (change)='WeightStyle($event,style)'>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+</div>
